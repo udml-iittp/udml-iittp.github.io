@@ -1,0 +1,88 @@
+/* style.css */
+
+/* Color Variables */
+:root {
+  --bg-color: #f4f4f4;        /* Light gray background */
+  --text-color: #333;         /* Darker gray for text */
+  --accent-color: #800000;    /* Dark maroon */
+  --header-bg: #e0e0e0;       /* Slightly darker gray for header */
+  --nav-hover: #4d0000;       /* Hover color (deeper maroon) */
+  --logo-width: 60px;         /* Adjust logo size here */
+}
+
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* Header and Nav */
+header {
+  background-color: var(--header-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 2rem;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+.logo-container img {
+  width: var(--logo-width);
+  margin-right: 0.75rem;
+}
+
+.site-title {
+  font-weight: bold;
+  color: var(--accent-color);
+  font-size: 1.2rem;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+}
+nav ul li {
+  margin-left: 1.5rem;
+}
+nav ul li a {
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+nav ul li a:hover {
+  color: var(--nav-hover);
+}
+
+/* Main Content */
+main {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Headings */
+h1, h2, h3 {
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  background-color: var(--header-bg);
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}
