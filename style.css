@@ -28,6 +28,7 @@ body {
 header {
   background-color: var(--header-bg);
   display: flex;
+  flex-wrap: wrap;  /* Allows the nav to wrap under the logo on smaller screens */
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 2rem;
@@ -51,6 +52,7 @@ header {
 nav ul {
   list-style: none;
   display: flex;
+  flex-wrap: wrap;  /* Allows the menu items to wrap on smaller screens */
 }
 nav ul li {
   margin-left: 1.5rem;
@@ -85,4 +87,29 @@ footer {
   background-color: var(--header-bg);
   margin-top: 2rem;
   font-size: 0.9rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .logo-container img {
+    width: 50px;  /* Smaller logo for smaller screens */
+  }
+
+  nav ul {
+    padding-top: 0.5rem; /* Adds some spacing */
+    justify-content: center;
+  }
+  
+  nav ul li {
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+  }
+
+  main {
+    padding: 0 10px; /* Smaller padding for smaller screens */
+  }
+
+  .site-title {
+    font-size: 1rem; /* Smaller font size for site title */
+  }
 }
