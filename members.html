@@ -2,16 +2,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UDML | Members</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Inline CSS for demonstration; ideally place this in style.css */
+    .member {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .member img {
+      width: 100px;         /* Adjust photo size as needed */
+      height: 100px;
+      object-fit: cover;
+      border-radius: 50%;   /* Makes image circular, remove if you prefer squares */
+      margin-right: 1rem;
+    }
+    .member-info {
+      line-height: 1.4;
+    }
+    .member-info strong {
+      font-size: 1.1rem;
+    }
+  </style>
 </head>
 <body>
   <header>
     <div class="logo-container">
       <img src="logo.png" alt="UDML Logo" />
-      <span class="site-title">Urban Dynamics &amp; Mobility Lab</span>
+      <span class="site-title">
+        Urban Dynamics &amp; Mobility Lab<br>
+        IIT Tirupati
+      </span>
     </div>
     <nav>
       <ul>
@@ -27,27 +51,74 @@
 
   <main>
     <h1>Our Team</h1>
-    <section>
-      <h2>Principal Investigator (PI)</h2>
-      <p>
-        <strong>Dr. [Your Name]</strong><br>
-        Department of Humanities &amp; Social Sciences,<br>
-        IIT Tirupati.
-      </p>
-    </section>
 
-    <section>
-      <h2>Researchers &amp; Fellows</h2>
-      <ul>
-        <li>Junior Research Fellow: [Name, brief role]</li>
-        <li>Visiting Researcher: [Name, project affiliation]</li>
-        <!-- Add more team members as needed -->
-      </ul>
-    </section>
+    <!-- Faculty Section -->
+    <h2>Faculty</h2>
+    <div class="member">
+      <!-- Replace images/varun.jpg with the correct path to Dr. Varun Varghese's photo -->
+      <img src="Varun.jpg" alt="Varun Varghese Photo" />
+      <div class="member-info">
+        <strong>Varun Varghese</strong><br>
+        Assistant Professor<br>
+        Department of Humanities and Social Sciences<br>
+        Indian Institute of Technology Tirupati
+      </div>
+    </div>
+
+    <!-- PhD Students Section -->
+    <h2>PhD Students</h2>
+
+    <div class="member">
+      <!-- Replace images/raajkamal.jpg with the correct path to Raajkamal G's photo -->
+      <img src="Raajkamal.jpg" alt="Raajkamal G Photo" />
+      <div class="member-info">
+        <strong>Raajkamal G</strong><br>
+        Research Topic: [Add Topic Here]<br>
+        Year of Enrollment: [Add Year]<br>
+        Hobbies: [Add Hobbies Here]
+      </div>
+    </div>
+
+    <div class="member">
+      <!-- Replace images/vijaya.jpg with the correct path to Vijaya Padmakar V's photo -->
+      <img src="Vijaya.jpg" alt="Vijaya Padmakar V Photo" />
+      <div class="member-info">
+        <strong>Vijaya Padmakar V</strong><br>
+        Research Topic: [Add Topic Here]<br>
+        Year of Enrollment: [Add Year]<br>
+        Hobbies: [Add Hobbies Here]
+      </div>
+    </div>
+
+    <!-- Masters Students Section -->
+    <h2>Masters Students (Master of Public Policy)</h2>
+
+    <div class="member">
+      <!-- Replace images/lalitha.jpg with the correct path to Lalitha Sowmya Chintalapudi's photo -->
+      <img src="Lalitha.jpg" alt="Lalitha Sowmya Chintalapudi Photo" />
+      <div class="member-info">
+        <strong>Lalitha Sowmya Chintalapudi</strong><br>
+        Research Topic: [Add Topic Here]<br>
+        Year of Enrollment: [Add Year]<br>
+        Hobbies: [Add Hobbies Here]
+      </div>
+    </div>
+
+    <div class="member">
+      <!-- Replace images/lakshmi.jpg with the correct path to Lakshmi Narayana B's photo -->
+      <img src="Lakshmi.jpg" alt="Lakshmi Narayana B Photo" />
+      <div class="member-info">
+        <strong>Lakshmi Narayana B</strong><br>
+        Research Topic: [Add Topic Here]<br>
+        Year of Enrollment: [Add Year]<br>
+        Hobbies: [Add Hobbies Here]
+      </div>
+    </div>
+
   </main>
 
   <footer>
-    &copy; 2023 Urban Dynamics and Mobility Lab, IIT Tirupati
+    &copy; 2025 Urban Dynamics and Mobility Lab, IIT Tirupati
   </footer>
 </body>
 </html>
