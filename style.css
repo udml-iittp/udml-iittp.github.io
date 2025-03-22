@@ -7,7 +7,7 @@
   --accent-color: #800000;    /* Dark maroon */
   --header-bg: #e0e0e0;       /* Slightly darker gray for header */
   --nav-hover: #4d0000;       /* Hover color (deeper maroon) */
-  --logo-width: 60px;         /* Adjust logo size here */
+  --logo-width: 60px;         /* Default logo width */
 }
 
 /* Basic Reset */
@@ -24,7 +24,7 @@ body {
   line-height: 1.6;
 }
 
-/* Header and Nav */
+/* Header and Navigation */
 header {
   background-color: var(--header-bg);
   display: flex;
@@ -41,7 +41,6 @@ header {
   width: var(--logo-width);
   margin-right: 0.75rem;
 }
-
 .site-title {
   font-weight: bold;
   color: var(--accent-color);
@@ -87,19 +86,20 @@ footer {
   font-size: 0.9rem;
 }
 
-/* Mobile Responsive Styles */
+/* Responsive Styles */
 @media (max-width: 600px) {
   header {
     flex-direction: column;
     align-items: center;
-    padding: 0.5rem;
+    padding: 1rem;
   }
   .logo-container {
     flex-direction: column;
     text-align: center;
+    margin-bottom: 1rem;
   }
   .logo-container img {
-    width: 100px; /* Adjust as needed for mobile */
+    width: 80px; /* slightly larger for visibility on small screens */
     margin: 0 0 0.5rem 0;
   }
   .site-title {
@@ -108,16 +108,21 @@ footer {
   }
   nav ul {
     flex-direction: column;
-    margin: 0;
-    padding: 0;
+    width: 100%;
+    align-items: center;
+    margin-top: 1rem;
   }
   nav ul li {
+    margin: 0.5rem 0;
     margin-left: 0;
-    margin-bottom: 0.5rem;
   }
   main {
+    width: 95%;
     margin: 1rem auto;
-    padding: 0 0.5rem;
-    max-width: 100%;
+    padding: 0;
+  }
+  footer {
+    font-size: 0.8rem;
+    padding: 0.5rem;
   }
 }
