@@ -87,6 +87,31 @@ footer {
   font-size: 0.9rem;
 }
 
+/* Members specific styles */
+.member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.member img {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 50%; /* Circular images */
+  margin-right: 1rem;
+  filter: grayscale(100%);
+  transition: filter 0.5s ease;
+}
+.member img:hover {
+  filter: grayscale(0%);
+}
+.member-info {
+  flex-grow: 1;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .logo-container img {
@@ -94,7 +119,7 @@ footer {
   }
 
   nav ul {
-    padding-top: 0.5rem; /* Adds some spacing */
+    padding-top: 0.5rem;
     justify-content: center;
   }
   
@@ -104,10 +129,21 @@ footer {
   }
 
   main {
-    padding: 0 10px; /* Smaller padding for smaller screens */
+    padding: 0 10px;
   }
 
   .site-title {
-    font-size: 1rem; /* Smaller font size for site title */
+    font-size: 1rem;
+  }
+
+  .member {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .member img {
+    width: 200px; /* Smaller images on smaller screens */
+    height: 200px;
+    margin-bottom: 1rem; /* Adds space between the image and text */
   }
 }
