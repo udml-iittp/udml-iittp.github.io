@@ -6,6 +6,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UDML | Resources</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Simple card styling for resource items */
+    .resources-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .resource-card {
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      background: #fff;
+    }
+    .resource-card h2 {
+      margin: 0 0 8px 0;
+      font-size: 1.2rem;
+    }
+    .resource-card p {
+      margin: 0 0 12px 0;
+      text-align: justify;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: #fff;
+      text-decoration: none;
+      color: #000;
+      font-size: 0.95rem;
+    }
+    .btn:hover { background: #f7f7f7; }
+    .tag {
+      display: inline-block;
+      font-size: 0.85rem;
+      background: #eef2ff;
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin-left: 8px;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -33,6 +76,23 @@
     <p style="text-align: justify;">
       This page is currently under development and will be updated periodically with new resources to assist the research community and other stakeholders.
     </p>
+
+    <!-- New: List of available resources -->
+    <section class="resources-list" aria-label="Available resources">
+      <article class="resource-card">
+        <h2>
+          AHP Weighting Survey
+          <span class="tag">New</span>
+        </h2>
+        <p>
+          Configure and conduct Analytic Hierarchy Process (AHP) surveys online. 
+          Participants can provide pairwise comparisons, automatically calculate 
+          weights, check consistency (CI/CR), and export results. Data can also be 
+          collected anonymously for teaching and research purposes.
+        </p>
+        <a class="btn" href="ahp.html">Open AHP Survey</a>
+      </article>
+    </section>
   </main>
 
   <footer>
