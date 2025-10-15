@@ -1,5 +1,4 @@
-const APPS_SCRIPT_ENDPOINT = "";
-<!-- ahp.html -->
+<!-- ahp.html (Designer + Respondent modes) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,14 +7,15 @@ const APPS_SCRIPT_ENDPOINT = "";
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link rel="stylesheet" href="style.css"/>
   <style>
-    body { font-family: system-ui, Arial, sans-serif; max-width: 980px; margin: 24px auto; padding: 0 16px; }
+    body { font-family: system-ui, Arial, sans-serif; max-width: 1100px; margin: 24px auto; padding: 0 16px; }
     header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
     .site { display:flex; align-items:center; gap:10px; }
     .site img { width:38px; height:38px; object-fit:cover; border-radius:6px; }
-    h1 { font-size: 1.5rem; margin: 0; }
+    h1, h2, h3 { margin: 0 0 8px 0; }
     .pill { font-size: .85rem; background:#eef2ff; border:1px solid #e5e7eb; border-radius:999px; padding:4px 10px; }
     .card { border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.03); background:white; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; }
     label { font-weight: 600; }
     textarea, input[type="text"], input[type="email"], select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; margin: 10px 0;}
@@ -23,25 +23,36 @@ const APPS_SCRIPT_ENDPOINT = "";
     th { background: #fafafa; }
     .btn { cursor:pointer; border:1px solid #ddd; background:white; border-radius:10px; padding:8px 12px; }
     .btn:hover { background:#f9f9f9; }
+    .btn-primary { border-color:#3b82f6; }
+    .btn-group { display:flex; gap:8px; flex-wrap:wrap; }
     .muted { color:#666 }
     .small { font-size: .9rem; }
     .right { text-align:right; }
-    .ok { color:#15803d; }
-    .warn { color:#b45309; }
+    .ok { color:#15803d; font-weight:600; }
+    .warn { color:#b45309; font-weight:600; }
+    .mode-tabs { display:flex; gap:8px; }
+    .mode-btn { padding:8px 12px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+    .mode-btn.active { background:#eef2ff; border-color:#c7d2fe; }
+    .criteria-list { display:flex; flex-direction:column; gap:12px; }
+    .criterion { border:1px dashed #e5e7eb; border-radius:10px; padding:12px; }
+    .crit-head { display:flex; gap:8px; align-items:center; }
+    .sub-list { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+    .sub-row { display:grid; grid-template-columns: 1fr auto; gap:8px; }
+    .tag { display:inline-block; font-size: .85rem; background:#f1f5f9; padding:3px 8px; border-radius:999px; }
     canvas { max-width:100%; }
     footer { margin: 24px 0; color:#666; font-size:0.85rem;}
     nav ul { list-style:none; display:flex; gap:12px; margin:0; padding:0; }
     nav a { text-decoration:none; }
+    .hr { height:1px; background:#eee; margin:12px 0; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <!-- lightweight top bar to match your site -->
   <header>
     <div class="site">
       <img src="logo.JPG" alt="UDML Logo"/>
       <div>
-        <div style="font-weight:700">Urban Dynamics & Mobility Lab, IIT Tirupati</div>
+        <div style="font-weight:700">Urban Dynamics &amp; Mobility Lab, IIT Tirupati</div>
         <div class="small muted">AHP Weighting Survey</div>
       </div>
     </div>
@@ -57,43 +68,68 @@ const APPS_SCRIPT_ENDPOINT = "";
     </nav>
   </header>
 
-  <!-- Designer mode -->
-  <section class="card">
-    <div style="display:flex; align-items:center; gap:10px; justify-content:space-between;">
+  <!-- MODE SWITCH -->
+  <div class="card">
+    <div class="mode-tabs">
+      <button id="btnDesigner" class="mode-btn active" onclick="switchMode('designer')">Designer</button>
+      <button id="btnRespondent" class="mode-btn" onclick="switchMode('respondent')">Respondent</button>
+    </div>
+    <p class="small muted" style="margin:6px 0 0 0;">Switch between <b>Designer</b> (configure survey &amp; share link) and <b>Respondent</b> (answer pairwise comparisons).</p>
+  </div>
+
+  <!-- DESIGNER MODE -->
+  <section id="designerMode" class="card">
+    <h1>Designer</h1>
+    <p class="small muted">Name your survey, add criteria and optional sub-criteria. Generate a share link or preview as respondent.</p>
+
+    <div class="row">
       <div>
-        <h1 style="margin:0;">Configure & Share</h1>
-        <p class="small muted" style="margin:4px 0 0 0;">Designer mode: paste your config to generate a shareable link. Respondents will only see the survey.</p>
+        <label>Survey title</label>
+        <input id="d_title" type="text" placeholder="e.g., Urban Flood Vulnerability (Criteria & Sub-criteria)"/>
       </div>
-      <span class="pill">MVP · Criteria-only</span>
+      <div>
+        <label>Model ID (short code)</label>
+        <input id="d_model" type="text" placeholder="e.g., flood_v1"/>
+      </div>
     </div>
 
-    <div class="row" style="margin-top:12px;">
+    <div style="margin-top:12px;">
+      <label>Instructions (shown to respondents)</label>
+      <textarea id="d_instructions" rows="3" placeholder="Compare each pair: which is more important, and by how much (Saaty 1–9)."></textarea>
+    </div>
+
+    <div class="hr"></div>
+
+    <h3>Criteria &amp; Sub-criteria</h3>
+    <div id="criteriaBox" class="criteria-list"></div>
+    <div class="btn-group" style="margin-top:8px;">
+      <button class="btn btn-primary" onclick="addCriterion()">+ Add criterion</button>
+      <button class="btn" onclick="clearAllCriteria()">Clear all</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="row">
       <div>
-        <label>Config JSON</label>
-        <textarea id="config" rows="8">
-{
-  "model_id": "demo_v1",
-  "title": "Urban Flood Vulnerability (Criteria Weights)",
-  "instructions": "Compare each pair: which criterion is more important, and by how much (Saaty 1–9).",
-  "criteria": ["Exposure","Sensitivity","Adaptive Capacity"]
-}
-        </textarea>
+        <label>Config JSON (read-only)</label>
+        <textarea id="configPreview" rows="10" readonly></textarea>
       </div>
       <div>
         <label>Shareable link</label>
         <input id="sharelink" type="text" readonly />
-        <div class="row" style="grid-template-columns:auto auto; margin-top:8px;">
-          <button class="btn" onclick="makeLink()">Make link</button>
-          <button class="btn" onclick="copyLink()">Copy</button>
+        <div class="btn-group" style="margin-top:8px;">
+          <button class="btn btn-primary" onclick="makeLink()">Make link</button>
+          <button class="btn" onclick="copyLink()">Copy link</button>
+          <button class="btn" onclick="previewRespondent()">Preview as respondent</button>
         </div>
-        <p class="small muted" style="margin-top:8px;">Tip: Put this link under your “Resources → AHP Weighting Survey”.</p>
+        <p class="small muted" style="margin-top:8px;">The link encodes the survey config; no login or server needed.</p>
       </div>
     </div>
   </section>
 
-  <!-- Respondent mode -->
-  <section class="card" id="respondent">
-    <h2 style="margin:0 0 8px 0" id="survey_title">AHP Survey</h2>
+  <!-- RESPONDENT MODE -->
+  <section id="respondentMode" class="card" style="display:none;">
+    <h1 id="survey_title">Respondent</h1>
     <p id="survey_instructions" class="muted" style="margin:0 0 16px 0;"></p>
 
     <!-- Respondent & consent (required) -->
@@ -127,10 +163,23 @@ const APPS_SCRIPT_ENDPOINT = "";
       </label>
     </div>
 
-    <div id="pairwise_block" style="margin-top:12px;"></div>
+    <!-- Optional: paste config if no ?cfg -->
+    <div class="card" style="background:#fcfdfd">
+      <label class="small" style="font-weight:700;">If the survey didn’t load from a link, paste config JSON here and click “Load config”.</label>
+      <div class="row">
+        <textarea id="resp_config_text" rows="6" placeholder='{"model_id":"...","title":"...","instructions":"...","criteria":[{"name":"Exposure","subcriteria":["Rainfall","Inundation"]},{"name":"Sensitivity"},{"name":"Adaptive Capacity","subcriteria":["Income","Shelter Quality"]}]}'></textarea>
+        <div>
+          <button class="btn" onclick="loadConfigFromText()">Load config</button>
+          <p class="small muted" style="margin-top:8px;">Or open via a share link that includes <code>?cfg=</code> in the URL.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pairwise areas (built dynamically) -->
+    <div id="pairwiseContainer"></div>
 
     <div class="row" style="margin-top:10px;">
-      <button class="btn" onclick="computeAHP()">Compute Weights &amp; Consistency</button>
+      <button class="btn btn-primary" onclick="computeAll()">Compute Weights &amp; Consistency</button>
       <div class="right">
         <button class="btn" onclick="exportCSV()">Download CSV</button>
         <button class="btn" onclick="exportJSON()">Download JSON</button>
@@ -139,15 +188,29 @@ const APPS_SCRIPT_ENDPOINT = "";
 
     <div id="results" style="display:none; margin-top: 14px">
       <h3 style="margin:8px 0">Results</h3>
-      <table id="weights_tbl"></table>
-      <p id="consistency_msg" class="small"></p>
-      <div class="card">
-        <canvas id="chart"></canvas>
+
+      <!-- Criteria results -->
+      <div id="criteriaResults" class="card">
+        <h3 style="margin:0 0 6px 0;">Criteria Weights</h3>
+        <table id="criteria_tbl"></table>
+        <p id="criteria_consistency" class="small"></p>
+        <canvas id="criteria_chart"></canvas>
       </div>
-      <div class="right">
-        <button class="btn" onclick="submitToSheets()">Submit</button>
+
+      <!-- Sub-criteria results (if any) -->
+      <div id="subResults"></div>
+
+      <!-- Global weights table/chart (if any sub-criteria exist) -->
+      <div id="globalResults" class="card" style="display:none;">
+        <h3 style="margin:0 0 6px 0;">Global Weights (sub-criteria × parent criteria)</h3>
+        <table id="global_tbl"></table>
+        <canvas id="global_chart"></canvas>
       </div>
-      <p class="small muted">If your CR is &gt; 0.10, please revise your judgements above and recompute.</p>
+
+      <div class="right" style="margin-top:8px;">
+        <button class="btn btn-primary" onclick="submitToSheets()">Submit</button>
+      </div>
+      <p class="small muted">If any CR is &gt; 0.10, please revise your judgements and recompute.</p>
     </div>
   </section>
 
@@ -156,20 +219,141 @@ const APPS_SCRIPT_ENDPOINT = "";
       <b>Saaty (1–9) scale quick guide</b>
       <div class="small">
         1: equal · 3: moderate · 5: strong · 7: very strong · 9: extreme (2/4/6/8 are intermediate).
-        Use reciprocals (1/3, 1/5, …) when the column criterion is more important.
+        Use reciprocals (1/3, 1/5, …) when the column item is more important.
       </div>
     </div>
-    <p class="small muted">For multiple experts, aggregate their pairwise matrices using the entry-wise geometric mean before recomputing weights &amp; CR.</p>
+    <p class="small muted">For multiple experts, aggregate pairwise matrices using entry-wise geometric mean, then recompute weights &amp; CR.</p>
   </footer>
 
 <script>
 /* ====== CONFIG ====== */
-const APPS_SCRIPT_ENDPOINT = ""; // <-- paste your Google Apps Script Web App URL here
+const APPS_SCRIPT_ENDPOINT = ""; // <-- paste your Google Apps Script Web App URL here later
 
 /* ====== SAATY RI TABLE ====== */
 const RI = {1:0.00, 2:0.00, 3:0.58, 4:0.90, 5:1.12, 6:1.24, 7:1.32, 8:1.41, 9:1.45, 10:1.49};
 
-/* ====== DESIGNER: build share link ====== */
+/* ====== STATE ====== */
+let CFG = { model_id:"", title:"", instructions:"", criteria:[] }; // normalized: criteria = [{name, subcriteria?:[]}]
+let _charts = []; // keep chart instances to destroy before re-render
+let _lastResults = null; // for export/submit
+
+/* ====== MODE SWITCH ====== */
+function switchMode(mode){
+  const d = document.getElementById('designerMode');
+  const r = document.getElementById('respondentMode');
+  const bd = document.getElementById('btnDesigner');
+  const br = document.getElementById('btnRespondent');
+  if (mode==='designer'){ d.style.display='block'; r.style.display='none'; bd.classList.add('active'); br.classList.remove('active'); }
+  else { d.style.display='none'; r.style.display='block'; bd.classList.remove('active'); br.classList.add('active'); }
+}
+
+/* ====== DESIGNER UI ====== */
+function addCriterion(name=""){
+  const box = document.getElementById('criteriaBox');
+  const idx = box.children.length;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'criterion';
+  wrapper.dataset.idx = idx;
+
+  wrapper.innerHTML = `
+    <div class="crit-head">
+      <span class="tag">Criterion ${idx+1}</span>
+      <input type="text" class="crit-name" placeholder="Criterion name (e.g., Exposure)" value="${escapeHTML(name)}" />
+      <div class="btn-group">
+        <button class="btn" onclick="addSubcriterion(this)">+ Add sub-criterion</button>
+        <button class="btn" onclick="removeCriterion(this)">Remove</button>
+      </div>
+    </div>
+    <div class="sub-list"></div>
+  `;
+  box.appendChild(wrapper);
+  updateConfigPreview();
+}
+
+function addSubcriterion(btn, value=""){
+  const crit = btn.closest('.criterion');
+  const sub = crit.querySelector('.sub-list');
+  const row = document.createElement('div');
+  row.className = 'sub-row';
+  row.innerHTML = `
+    <input type="text" class="sub-name" placeholder="Sub-criterion name" value="${escapeHTML(value)}"/>
+    <button class="btn" onclick="row.remove(); updateConfigPreview()">Remove</button>
+  `;
+  sub.appendChild(row);
+  updateConfigPreview();
+}
+
+function removeCriterion(btn){
+  btn.closest('.criterion').remove();
+  relabelCriteria();
+  updateConfigPreview();
+}
+
+function relabelCriteria(){
+  const items = document.querySelectorAll('.criterion');
+  items.forEach((el,i)=>{
+    el.dataset.idx = i;
+    el.querySelector('.tag').textContent = `Criterion ${i+1}`;
+  });
+}
+
+function clearAllCriteria(){
+  document.getElementById('criteriaBox').innerHTML = '';
+  updateConfigPreview();
+}
+
+function collectDesignerConfig(){
+  const title = document.getElementById('d_title').value.trim();
+  const model = document.getElementById('d_model').value.trim();
+  const ins = document.getElementById('d_instructions').value.trim();
+  const critEls = document.querySelectorAll('.criterion');
+  const criteria = [];
+  critEls.forEach(el=>{
+    const name = el.querySelector('.crit-name').value.trim();
+    if (!name) return;
+    const subs = Array.from(el.querySelectorAll('.sub-name')).map(i=>i.value.trim()).filter(Boolean);
+    const obj = { name };
+    if (subs.length>0) obj.subcriteria = subs;
+    criteria.push(obj);
+  });
+  return { model_id: model || "model_"+Date.now(), title: title || "Untitled AHP Survey", instructions: ins || "", criteria };
+}
+
+function updateConfigPreview(){
+  const cfg = collectDesignerConfig();
+  CFG = normalizeConfig(cfg);
+  document.getElementById('configPreview').value = JSON.stringify(CFG, null, 2);
+}
+
+function makeLink(){
+  updateConfigPreview();
+  if (!CFG.criteria || CFG.criteria.length < 2) {
+    alert("Add at least two criteria.");
+    return;
+  }
+  const payload = btoa(encodeURIComponent(JSON.stringify(CFG)));
+  const link = `${location.origin}${location.pathname}?cfg=${payload}`;
+  document.getElementById("sharelink").value = link;
+}
+
+function copyLink(){
+  const el = document.getElementById("sharelink");
+  if (!el.value) { alert("Create a link first."); return; }
+  navigator.clipboard.writeText(el.value).then(()=>alert("Link copied."));
+}
+
+function previewRespondent(){
+  makeLink();
+  const link = document.getElementById('sharelink').value;
+  if (!link) return;
+  // Load locally (no new tab) so the user sees exactly what respondents will see
+  history.replaceState(null, "", link);
+  loadConfigForRespondent(getConfigFromURL());
+  switchMode('respondent');
+}
+
+/* ====== RESPONDENT LOADING ====== */
 function getConfigFromURL() {
   const u = new URL(window.location.href);
   const cfg = u.searchParams.get("cfg");
@@ -177,64 +361,89 @@ function getConfigFromURL() {
   try { return JSON.parse(decodeURIComponent(atob(cfg))); } catch { return null; }
 }
 
-function makeLink() {
-  let cfg;
-  try { cfg = JSON.parse(document.getElementById("config").value); }
-  catch (e) { alert("Config JSON is invalid."); return; }
-  if (!cfg.criteria || !Array.isArray(cfg.criteria) || cfg.criteria.length < 2) {
-    alert("Config must include a 'criteria' array with at least two items.");
-    return;
+function loadConfigFromText(){
+  try {
+    const obj = JSON.parse(document.getElementById('resp_config_text').value);
+    loadConfigForRespondent(obj);
+  } catch(e){
+    alert("Invalid JSON.");
   }
-  const payload = btoa(encodeURIComponent(JSON.stringify(cfg)));
-  const link = `${location.origin}${location.pathname}?cfg=${payload}`;
-  document.getElementById("sharelink").value = link;
 }
 
-function copyLink() {
-  const el = document.getElementById("sharelink");
-  if (!el.value) { alert("Create a link first."); return; }
-  navigator.clipboard.writeText(el.value).then(()=>alert("Link copied."));
+function loadConfigForRespondent(obj){
+  if (!obj) { alert("No config found."); return; }
+  CFG = normalizeConfig(obj);
+  document.getElementById("survey_title").textContent = CFG.title || "AHP Survey";
+  document.getElementById("survey_instructions").textContent = CFG.instructions || "";
+  renderRespondentMatrices(CFG);
 }
 
-/* ====== INIT SURVEY ====== */
-function init() {
-  const cfg = getConfigFromURL() || safeParse(document.getElementById("config").value) || {
-    model_id:"demo_v1",
-    title:"AHP Survey",
-    instructions:"Compare each pair: which criterion is more important, and by how much (Saaty 1–9).",
-    criteria:["Criterion 1","Criterion 2","Criterion 3"]
-  };
-  window.AHP_CFG = cfg;
-  document.getElementById("survey_title").textContent = cfg.title || "AHP Survey";
-  document.getElementById("survey_instructions").textContent = cfg.instructions || "";
+function normalizeConfig(obj){
+  const cfg = { model_id: obj.model_id || ("model_"+Date.now()), title: obj.title || "AHP Survey", instructions: obj.instructions || "", criteria: [] };
+  // normalize criteria: allow strings or {name, subcriteria}
+  if (Array.isArray(obj.criteria)){
+    for (const c of obj.criteria){
+      if (typeof c === 'string') cfg.criteria.push({ name: c });
+      else if (c && typeof c.name === 'string') {
+        const entry = { name: c.name };
+        if (Array.isArray(c.subcriteria) && c.subcriteria.length>0) entry.subcriteria = c.subcriteria.filter(s=>typeof s==='string' && s.trim().length>0);
+        cfg.criteria.push(entry);
+      }
+    }
+  }
+  return cfg;
+}
 
-  const C = cfg.criteria;
-  const n = C.length;
-  const block = document.getElementById("pairwise_block");
-  block.innerHTML = "";
+/* ====== BUILD PAIRWISE UI ====== */
+function renderRespondentMatrices(cfg){
+  // clear any previous
+  const pc = document.getElementById('pairwiseContainer');
+  pc.innerHTML = "";
 
-  const tbl = document.createElement("table");
-  const thead = document.createElement("thead");
-  const trh = document.createElement("tr");
-  trh.innerHTML = `<th>Row \\ Col</th>` + C.map(c => `<th>${escapeHTML(c)}</th>`).join("");
+  // Criteria matrix
+  const critLabels = cfg.criteria.map(c=>c.name);
+  pc.appendChild(buildPairwiseBlock("Criteria comparison", "criteria", critLabels));
+
+  // For each sub-criteria group
+  cfg.criteria.forEach((c, idx)=>{
+    if (c.subcriteria && c.subcriteria.length>=2){
+      const labels = c.subcriteria;
+      pc.appendChild(buildPairwiseBlock(`Sub-criteria for “${escapeHTML(c.name)}”`, `sub_${idx}`, labels));
+    }
+  });
+}
+
+function buildPairwiseBlock(title, key, labels){
+  const block = document.createElement('div');
+  block.className = 'card';
+  block.dataset.key = key;
+
+  const head = document.createElement('div');
+  head.innerHTML = `<h3 style="margin:0 0 6px 0;">${escapeHTML(title)}</h3>
+                    <p class="small muted" style="margin:0 0 10px 0;">Select Saaty scale values (1–9); reciprocals auto-filled.</p>`;
+  block.appendChild(head);
+
+  const tbl = document.createElement('table');
+  const thead = document.createElement('thead');
+  const trh = document.createElement('tr');
+  trh.innerHTML = `<th>Row \\ Col</th>` + labels.map(c => `<th>${escapeHTML(c)}</th>`).join("");
   thead.appendChild(trh);
   tbl.appendChild(thead);
 
-  const tbody = document.createElement("tbody");
-
+  const tbody = document.createElement('tbody');
+  const n = labels.length;
   const opts = [1/9,1/8,1/7,1/6,1/5,1/4,1/3,1/2,1,2,3,4,5,6,7,8,9];
 
   for (let i=0;i<n;i++) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<th>${escapeHTML(C[i])}</th>`;
+    tr.innerHTML = `<th>${escapeHTML(labels[i])}</th>`;
     for (let j=0;j<n;j++) {
       const td = document.createElement("td");
       if (i===j) {
         td.textContent = "1";
-        td.dataset.fixed = "1";
       } else if (i<j) {
         const sel = document.createElement("select");
-        sel.dataset.i = i; sel.dataset.j = j;
+        sel.dataset.i = i; sel.dataset.j = j; sel.dataset.key = key;
         opts.forEach(v=>{
           const opt = document.createElement("option");
           opt.value = v; opt.text = (v>=1)? `${v}` : `1/${Math.round(1/v)}`;
@@ -245,7 +454,7 @@ function init() {
         td.appendChild(sel);
       } else {
         const span = document.createElement("span");
-        span.id = `mirror_${i}_${j}`;
+        span.id = `mirror_${key}_${i}_${j}`;
         span.textContent = "1";
         td.appendChild(span);
       }
@@ -255,37 +464,35 @@ function init() {
   }
   tbl.appendChild(tbody);
   block.appendChild(tbl);
+  return block;
 }
 
-function safeParse(s){ try { return JSON.parse(s); } catch { return null; } }
-function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m])); }
-
-/* ====== MIRROR RECIPROCALS ====== */
 function mirror(e){
   const i = +e.target.dataset.i, j = +e.target.dataset.j;
+  const key = e.target.dataset.key;
   const val = parseFloat(e.target.value);
   const m = (1/val).toFixed(5);
-  const target = document.getElementById(`mirror_${j}_${i}`);
+  const target = document.getElementById(`mirror_${key}_${j}_${i}`);
   if (target) target.textContent = m;
 }
 
-/* ====== BUILD MATRIX ====== */
-function buildMatrix(){
-  const C = AHP_CFG.criteria;
-  const n = C.length;
+/* ====== AHP CORE ====== */
+function buildMatrixFromDOM(key){
+  const block = document.querySelector(`div.card[data-key="${key}"]`);
+  if (!block) return null;
+  const labels = Array.from(block.querySelectorAll('thead th')).slice(1).map(th=>th.textContent);
+  const n = labels.length;
   const A = Array.from({length:n},()=>Array(n).fill(1));
-  const selects = document.querySelectorAll('select[data-i]');
+  const selects = block.querySelectorAll('select[data-i]');
   selects.forEach(sel=>{
     const i = +sel.dataset.i, j = +sel.dataset.j;
     const v = parseFloat(sel.value);
     A[i][j] = v; A[j][i] = 1/v;
   });
-  return A;
+  return { labels, A };
 }
 
-/* ====== AHP CORE ====== */
 function geometricMeanRow(row){
-  // product^(1/n)
   let prod = 1, n = row.length;
   for (let k=0;k<n;k++) prod *= row[k];
   return Math.pow(prod, 1/n);
@@ -296,7 +503,7 @@ function normalize(vec){
   return vec.map(v=>v/s);
 }
 
-function eigenApprox(A){ // row geometric mean approximation
+function eigenApprox(A){
   const n = A.length;
   const w = new Array(n);
   for (let i=0;i<n;i++) w[i] = geometricMeanRow(A[i]);
@@ -314,7 +521,6 @@ function lambdaMax(A, w){
   return sum/n;
 }
 
-/* ====== VALIDATION ====== */
 function requireFieldsOrAlert() {
   const name = document.getElementById('resp_name').value.trim();
   const email = document.getElementById('resp_email').value.trim();
@@ -326,56 +532,215 @@ function requireFieldsOrAlert() {
   return true;
 }
 
-/* ====== COMPUTE + RENDER ====== */
-function computeAHP(){
+/* ====== COMPUTE (CRITERIA + SUBS + GLOBAL) ====== */
+function computeAll(){
   if (!requireFieldsOrAlert()) return;
 
-  const A = buildMatrix();
-  const C = AHP_CFG.criteria;
-  const n = C.length;
+  // clear prior charts
+  _charts.forEach(ch=>{ try{ ch.destroy(); }catch{} });
+  _charts = [];
 
-  const w = eigenApprox(A);
-  const lam = lambdaMax(A, w);
-  const CI = (n>1) ? (lam - n) / (n - 1) : 0;
-  const ri = RI[n] ?? 1.49;
-  const CR = (ri===0)? 0 : (CI/ri);
+  // 1) Criteria
+  const crit = buildMatrixFromDOM('criteria');
+  if (!crit || crit.labels.length<2){ alert("Criteria comparison is missing."); return; }
+  const wC = eigenApprox(crit.A);
+  const lamC = lambdaMax(crit.A, wC);
+  const nC = crit.labels.length;
+  const CIC = (nC>1) ? (lamC - nC) / (nC - 1) : 0;
+  const RIC = RI[nC] ?? 1.49;
+  const CRC = (RIC===0)? 0 : (CIC/RIC);
 
-  // table
-  const tbl = document.getElementById("weights_tbl");
-  tbl.innerHTML = `<tr><th>Criterion</th><th>Weight</th></tr>` +
-    C.map((c,idx)=>`<tr><td>${escapeHTML(c)}</td><td>${w[idx].toFixed(4)}</td></tr>`).join("") +
-    `<tr><th>Total</th><th>${w.reduce((a,b)=>a+b,0).toFixed(4)}</th></tr>`;
+  renderWeightsTable('criteria_tbl', crit.labels, wC);
+  document.getElementById('criteria_consistency').innerHTML =
+    `n=${nC}, &lambda;<sub>max</sub>=${lamC.toFixed(4)}, CI=${CIC.toFixed(4)}, RI=${RIC.toFixed(2)}, CR=${CRC.toFixed(3)} · `
+    + (CRC<=0.10? `<span class="ok">Consistent (≤ 0.10)</span>` : `<span class="warn">Inconsistent (&gt; 0.10)</span>`);
+  _charts.push(renderBar('criteria_chart', crit.labels, wC, 'Criteria weights'));
 
-  // msg
-  const msg = document.getElementById("consistency_msg");
-  const ok = CR <= 0.10;
-  msg.innerHTML = `n=${n}, &lambda;<sub>max</sub>=${lam.toFixed(4)}, CI=${CI.toFixed(4)}, RI=${ri.toFixed(2)}, ` +
-    `CR=${CR.toFixed(3)} · ` +
-    (ok ? `<span class="ok">Consistent (≤ 0.10)</span>` :
-                `<span class="warn">Inconsistent (&gt; 0.10) — please revise judgements.</span>`);
+  // 2) Sub-criteria per group
+  const subResultsDiv = document.getElementById('subResults');
+  subResultsDiv.innerHTML = '';
+  const subBlocks = [];
+  CFG.criteria.forEach((c, idx)=>{
+    if (c.subcriteria && c.subcriteria.length>=2){
+      const blk = buildMatrixFromDOM(`sub_${idx}`);
+      if (!blk) return;
+      const wS = eigenApprox(blk.A);
+      const lamS = lambdaMax(blk.A, wS);
+      const nS = blk.labels.length;
+      const CIS = (nS>1) ? (lamS - nS) / (nS - 1) : 0;
+      const RIS = RI[nS] ?? 1.49;
+      const CRS = (RIS===0)? 0 : (CIS/RIS);
 
-  // chart
-  const ctx = document.getElementById('chart');
-  if (window._chart) window._chart.destroy();
-  window._chart = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: C, datasets: [{ label: 'Weights', data: w }] },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero:true, max:1 } } }
+      // render card
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<h3 style="margin:0 0 6px 0;">Sub-criteria Weights — ${escapeHTML(c.name)}</h3>
+                        <table id="sub_tbl_${idx}"></table>
+                        <p id="sub_cons_${idx}" class="small"></p>
+                        <canvas id="sub_chart_${idx}"></canvas>`;
+      subResultsDiv.appendChild(card);
+
+      renderWeightsTable(`sub_tbl_${idx}`, blk.labels, wS);
+      document.getElementById(`sub_cons_${idx}`).innerHTML =
+        `n=${nS}, &lambda;<sub>max</sub>=${lamS.toFixed(4)}, CI=${CIS.toFixed(4)}, RI=${RIS.toFixed(2)}, CR=${CRS.toFixed(3)} · `
+        + (CRS<=0.10? `<span class="ok">Consistent (≤ 0.10)</span>` : `<span class="warn">Inconsistent (&gt; 0.10)</span>`);
+      _charts.push(renderBar(`sub_chart_${idx}`, blk.labels, wS, `Sub-weights: ${c.name}`));
+      subBlocks.push({ parent: c.name, parentIndex: idx, labels: blk.labels, wS });
+    }
   });
 
-  document.getElementById("results").style.display = "block";
-  window._AHP_RESULT = {
-    model_id: AHP_CFG.model_id || null,
-    criteria: C,
-    weights: w,
-    lambda_max: lam,
-    CI, CR, n,
-    matrix: A,
+  // 3) Global weights (if any sub-criteria groups exist)
+  const anySubs = subBlocks.length>0;
+  if (anySubs){
+    const globalDiv = document.getElementById('globalResults');
+    globalDiv.style.display = 'block';
+
+    const rows = []; // { label: "Parent: Child", weight: wC[parent]*wS[child] }
+    subBlocks.forEach(sb=>{
+      const parentWeight = wC[sb.parentIndex];
+      sb.labels.forEach((lab, i)=>{
+        rows.push({ label: `${sb.parent}: ${lab}`, weight: parentWeight * sb.wS[i] });
+      });
+    });
+
+    // render table
+    renderWeightsTable('global_tbl', rows.map(r=>r.label), rows.map(r=>r.weight));
+    _charts.push(renderBar('global_chart', rows.map(r=>r.label), rows.map(r=>r.weight), 'Global weights'));
+  } else {
+    document.getElementById('globalResults').style.display = 'none';
+  }
+
+  // show results section
+  document.getElementById('results').style.display = 'block';
+
+  // stash results for export/submit
+  _lastResults = {
+    model_id: CFG.model_id,
+    title: CFG.title,
+    instructions: CFG.instructions,
+    criteria: CFG.criteria, // original tree
     respondent: meta(),
+    results: {
+      criteria: { labels: CFG.criteria.map(c=>c.name), weights: wC, lambda_max: lamC, CI: CIC, CR: CRC },
+      subcriteria: subBlocks.map(sb => ({
+        parent: sb.parent,
+        parentIndex: sb.parentIndex,
+        labels: sb.labels,
+        weights: sb.wS
+      })),
+      global: (anySubs ? {
+        labels: CFG.criteria.flatMap((c,i)=> (c.subcriteria && c.subcriteria.length>=2) ? c.subcriteria.map(s=>`${c.name}: ${s}`) : []),
+        weights: (function(){
+          const arr = [];
+          CFG.criteria.forEach((c,i)=>{
+            if (c.subcriteria && c.subcriteria.length>=2){
+              // find sub block for this parent
+              const sb = subBlocks.find(x=>x.parentIndex===i);
+              if (sb){
+                sb.wS.forEach(wi=>arr.push(wC[i]*wi));
+              }
+            }
+          });
+          return arr;
+        })()
+      } : null)
+    },
     ts: new Date().toISOString()
   };
 }
 
+function renderWeightsTable(tblId, labels, weights){
+  const tbl = document.getElementById(tblId);
+  tbl.innerHTML = `<tr><th>Item</th><th>Weight</th></tr>` +
+    labels.map((c,idx)=>`<tr><td style="text-align:left">${escapeHTML(c)}</td><td>${weights[idx].toFixed(4)}</td></tr>`).join("") +
+    `<tr><th style="text-align:left">Total</th><th>${weights.reduce((a,b)=>a+b,0).toFixed(4)}</th></tr>`;
+}
+
+function renderBar(canvasId, labels, weights, label){
+  const ctx = document.getElementById(canvasId);
+  const ch = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label, data: weights }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero:true, max:1 } } }
+  });
+  return ch;
+}
+
+/* ====== EXPORTS ====== */
+function exportCSV(){
+  if (!_lastResults){ alert("Compute first."); return; }
+  const r = _lastResults;
+  let csv = `model_id,${r.model_id}\ntitle,${csvEscape(r.title)}\nts,${r.ts}\n\n`;
+
+  // Criteria
+  csv += "Criteria,Weight\n";
+  r.results.criteria.labels.forEach((c,i)=> csv += `${csvEscape(c)},${r.results.criteria.weights[i]}\n`);
+  csv += `Total,${r.results.criteria.weights.reduce((a,b)=>a+b,0)}\n\n`;
+
+  // Sub-criteria
+  if (r.results.subcriteria && r.results.subcriteria.length){
+    r.results.subcriteria.forEach(sb=>{
+      csv += `Sub-criteria for,${csvEscape(sb.parent)}\nItem,Weight\n`;
+      sb.labels.forEach((lab,i)=> csv += `${csvEscape(lab)},${sb.weights[i]}\n`);
+      csv += `Total,${sb.weights.reduce((a,b)=>a+b,0)}\n\n`;
+    });
+  }
+
+  // Global
+  if (r.results.global){
+    csv += "Global Item,Global Weight\n";
+    r.results.global.labels.forEach((lab,i)=> csv += `${csvEscape(lab)},${r.results.global.weights[i]}\n`);
+    csv += `Total,${r.results.global.weights.reduce((a,b)=>a+b,0)}\n`;
+  }
+
+  download(csv, `ahp_${r.model_id || 'results'}.csv`, "text/csv");
+}
+
+function exportJSON(){
+  if (!_lastResults){ alert("Compute first."); return; }
+  download(JSON.stringify(_lastResults,null,2),
+           `ahp_${_lastResults.model_id || 'results'}.json`, "application/json");
+}
+
+function csvEscape(s){ return `"${String(s).replaceAll('"','""')}"`; }
+
+function download(content, filename, mime){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL( new Blob([content], {type:mime}) );
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ====== SUBMIT ====== */
+async function submitToSheets(){
+  if (!APPS_SCRIPT_ENDPOINT){ alert("No endpoint configured yet."); return; }
+  if (!_lastResults){ alert("Compute first."); return; }
+  if (!requireFieldsOrAlert()) return;
+
+  try{
+    const payload = {
+      model_id: _lastResults.model_id,
+      title: _lastResults.title,
+      instructions: _lastResults.instructions,
+      criteria_tree: _lastResults.criteria, // original structure
+      respondent: _lastResults.respondent,
+      results: _lastResults.results,
+      ts: _lastResults.ts
+    };
+    const res = await fetch(APPS_SCRIPT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("HTTP "+res.status);
+    alert("Submitted. Thank you!");
+  } catch(e){
+    alert("Submit failed: " + e.message);
+  }
+}
+
+/* ====== UTIL ====== */
 function meta(){
   return {
     name: document.getElementById('resp_name').value.trim(),
@@ -386,54 +751,46 @@ function meta(){
   }
 }
 
-/* ====== EXPORTS ====== */
-function exportCSV(){
-  if (!window._AHP_RESULT){ alert("Compute first."); return; }
-  const r = window._AHP_RESULT;
-  let csv = "criterion,weight\n";
-  r.criteria.forEach((c,i)=>csv += `${c},${r.weights[i]}\n`);
-  csv += `total,${r.weights.reduce((a,b)=>a+b,0)}\n`;
-  csv += `lambda_max,${r.lambda_max}\nCI,${r.CI}\nCR,${r.CR}\n`;
-  download(csv, `ahp_${r.model_id || 'results'}.csv`, "text/csv");
+function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m])); }
+
+function getConfigFromDesignerInputsToRespondent(){
+  // convenience if you want to move designer config directly to respondent without link
+  updateConfigPreview();
+  loadConfigForRespondent(CFG);
 }
 
-function exportJSON(){
-  if (!window._AHP_RESULT){ alert("Compute first."); return; }
-  download(JSON.stringify(window._AHP_RESULT,null,2),
-           `ahp_${window._AHP_RESULT.model_id || 'results'}.json`, "application/json");
-}
-
-function download(content, filename, mime){
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL( new Blob([content], {type:mime}) );
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-/* ====== SUBMIT TO GOOGLE SHEETS ====== */
-async function submitToSheets(){
-  if (!APPS_SCRIPT_ENDPOINT){ alert("No endpoint configured yet."); return; }
-  if (!window._AHP_RESULT){ alert("Compute first."); return; }
-
-  // enforce required fields again
-  if (!requireFieldsOrAlert()) return;
-
-  try{
-    const res = await fetch(APPS_SCRIPT_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type":"application/json" },
-      body: JSON.stringify(window._AHP_RESULT)
+function initFromURL(){
+  // Pre-load from URL if present
+  const cfgUrl = getConfigFromURL();
+  if (cfgUrl){
+    CFG = normalizeConfig(cfgUrl);
+    // pre-populate designer with this config
+    document.getElementById('d_title').value = CFG.title;
+    document.getElementById('d_model').value = CFG.model_id;
+    document.getElementById('d_instructions').value = CFG.instructions;
+    document.getElementById('criteriaBox').innerHTML = '';
+    CFG.criteria.forEach(c=>{
+      addCriterion(c.name);
+      const last = document.querySelector('.criterion:last-child');
+      if (c.subcriteria && c.subcriteria.length){
+        c.subcriteria.forEach(sc => addSubcriterion(last.querySelector('.btn'), sc));
+      }
     });
-    if (!res.ok) throw new Error("HTTP "+res.status);
-    alert("Submitted. Thank you!");
-  } catch(e){
-    alert("Submit failed: " + e.message);
+    updateConfigPreview();
+    // Load respondent view
+    loadConfigForRespondent(CFG);
+  } else {
+    // seed with 3 criteria (no subs) for a quick start
+    addCriterion("Exposure"); addCriterion("Sensitivity"); addCriterion("Adaptive Capacity");
+    updateConfigPreview();
   }
 }
 
-/* ====== UTIL ====== */
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded', ()=>{
+  initFromURL();
+  // default to Designer; respondent can be clicked
+  switchMode('designer');
+});
 </script>
 </body>
 </html>
